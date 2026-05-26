@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Samsarah — UGC Creator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:opsz,wght@9..40,200;9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F5F0E8;--cream2:#EDE6D6;--beige:#E4D9C4;
+  --sage:#8FA888;--sage-dark:#5C7A55;--sage-light:#C2D4BE;
+  --warm:#9C8B7A;--black:#1C1A17;--charcoal:#2A2720;
+  --gold:#BFA980;--white:#FDFAF4;
+}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--charcoal);font-family:'DM Sans',sans-serif;font-weight:300;overflow-x:hidden}
+
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--sage-dark);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;transition:opacity .5s ease,visibility .5s ease}
+#loader.out{opacity:0;visibility:hidden}
+.ld-name{font-family:'Playfair Display',serif;font-size:clamp(2rem,6vw,4rem);color:var(--cream);letter-spacing:.2em;font-weight:400;opacity:0;animation:fadeUp .5s .05s forwards}
+.ld-bar{width:0;height:1px;background:var(--gold);animation:barIn .6s .2s forwards}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes barIn{from{width:0}to{width:100px}}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:1.4rem 3rem;transition:background .4s,padding .4s,backdrop-filter .4s}
+nav.stuck{background:rgba(245,240,232,.92);backdrop-filter:blur(18px);padding:1rem 3rem;border-bottom:1px solid rgba(143,168,136,.18)}
+.nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:400;letter-spacing:.14em;color:var(--black);text-decoration:none}
+.nav-links{display:flex;gap:2rem;list-style:none}
+.nav-links a{font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;color:var(--warm);text-decoration:none;transition:color .3s}
+.nav-links a:hover{color:var(--sage-dark)}
+.nav-cta{font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;padding:.52rem 1.5rem;border:1px solid var(--sage);border-radius:50px;color:var(--sage-dark);text-decoration:none;transition:background .3s,color .3s}
+.nav-cta:hover{background:var(--sage-dark);color:var(--white)}
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px}
+.ham span{display:block;width:22px;height:1px;background:var(--charcoal)}
+.mob-menu{position:fixed;inset:0;z-index:200;background:var(--black);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2rem;transform:translateY(-100%);transition:transform .5s cubic-bezier(.77,0,.175,1)}
+.mob-menu.open{transform:none}
+.mob-menu a{font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--cream);text-decoration:none;transition:color .3s}
+.mob-menu a:hover{color:var(--gold)}
+.mob-close{position:absolute;top:1.5rem;right:1.5rem;font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer}
+
+/* HERO */
+#hero{min-height:100svh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8rem 2rem 5rem;text-align:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 80% 55% at 50% 25%,rgba(194,212,190,.22) 0%,transparent 70%);pointer-events:none}
+.hero-eyebrow{font-size:.65rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage);margin-bottom:1.4rem;opacity:0;animation:fadeUp .8s .15s forwards}
+.hero-title{font-family:'Playfair Display',serif;font-size:clamp(3rem,7vw,7rem);font-weight:400;line-height:1.05;color:var(--black);opacity:0;animation:fadeUp .9s .28s forwards}
+.hero-title em{font-style:italic;color:var(--sage-dark)}
+.hero-role{font-family:'Playfair Display',serif;font-size:clamp(1rem,2.2vw,1.45rem);font-weight:300;font-style:italic;color:var(--warm);margin-top:.5rem;letter-spacing:.04em;opacity:0;animation:fadeUp .9s .38s forwards}
+.hero-sub{margin-top:1.5rem;max-width:520px;font-size:.93rem;line-height:1.9;color:var(--warm);opacity:0;animation:fadeUp .9s .48s forwards;text-align:center}
+.hero-btns{margin-top:2.5rem;display:flex;gap:1rem;align-items:center;justify-content:center;flex-wrap:wrap;opacity:0;animation:fadeUp .9s .58s forwards}
+.btn-fill{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 2.2rem;background:var(--sage-dark);color:var(--white);border-radius:50px;border:none;text-decoration:none;cursor:pointer;transition:background .3s,transform .2s}
+.btn-fill:hover{background:var(--black);transform:translateY(-2px)}
+.btn-outline{font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;padding:.8rem 2.2rem;border:1px solid var(--beige);border-radius:50px;color:var(--warm);text-decoration:none;transition:border-color .3s,color .3s,transform .2s}
+.btn-outline:hover{border-color:var(--sage);color:var(--sage-dark);transform:translateY(-2px)}
+
+/* PHOTO STRIP */
+.photos-strip{display:flex;gap:1.2rem;align-items:flex-end;justify-content:center;margin-top:3.5rem;overflow:hidden;opacity:0;animation:fadeUp .9s .7s forwards}
+.photo-frame{border-radius:16px;overflow:hidden;flex-shrink:0;border:1px solid rgba(255,255,255,.5);box-shadow:0 8px 30px rgba(92,122,85,.12)}
+.photo-frame:nth-child(1){width:150px;height:200px;transform:rotate(-2.5deg)}
+.photo-frame:nth-child(2){width:185px;height:235px;transform:rotate(1deg)}
+.photo-frame:nth-child(3){width:148px;height:196px;transform:rotate(-1.5deg)}
+.photo-frame img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* STATS BAR */
+.stats-bar{background:var(--white);border-top:1px solid var(--beige);border-bottom:1px solid var(--beige);padding:2rem 4rem;display:flex;align-items:center;justify-content:center;gap:0;overflow-x:auto;scrollbar-width:none;flex-wrap:wrap}
+.stats-bar::-webkit-scrollbar{display:none}
+.stat-block{display:flex;flex-direction:column;align-items:center;padding:0 2.5rem;border-right:1px solid var(--beige);flex-shrink:0}
+.stat-n{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:400;color:var(--black);line-height:1}
+.stat-l{font-size:.58rem;letter-spacing:.25em;text-transform:uppercase;color:var(--warm);margin-top:.4rem}
+.logos-block{display:flex;gap:2rem;align-items:center;flex-wrap:wrap;justify-content:center;padding:0 2.5rem}
+.brand-pill{display:flex;align-items:center;justify-content:center;opacity:.6;transition:opacity .3s;height:32px}
+.brand-pill:hover{opacity:1}
+.brand-pill img{height:32px;width:auto;max-width:130px;object-fit:contain;display:block;mix-blend-mode:multiply;filter:grayscale(20%) contrast(1.1)}
+
+/* ABOUT */
+#about{padding:6rem 4rem;max-width:860px;margin:0 auto;text-align:center}
+.eyebrow{font-size:.62rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage);margin-bottom:.8rem}
+.sec-title{font-family:'Playfair Display',serif;font-size:clamp(2rem,4vw,3rem);font-weight:400;line-height:1.15;color:var(--black)}
+.sec-title em{font-style:italic;color:var(--sage-dark)}
+#about p{margin-top:1.4rem;font-size:.93rem;line-height:1.95;color:var(--warm);max-width:600px;margin-left:auto;margin-right:auto}
+.about-tags{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center;margin-top:2rem}
+.tag-pill{font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;padding:.38rem 1rem;border:1px solid var(--sage-light);border-radius:50px;color:var(--sage-dark);background:rgba(194,212,190,.12)}
+
+/* PORTFOLIO */
+#portfolio{padding:5rem 3rem;background:var(--cream2)}
+.port-head{text-align:center;margin-bottom:2.5rem}
+.port-head .eyebrow{color:var(--sage)}
+.port-head .sec-title{color:var(--black)}
+.port-head .sec-title em{color:var(--sage-dark)}
+.port-tabs{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
+.tab-btn{font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;padding:.48rem 1.3rem;border:1px solid var(--beige);border-radius:50px;background:var(--white);color:var(--warm);cursor:pointer;transition:all .3s;white-space:nowrap}
+.tab-btn.on,.tab-btn:hover{background:var(--sage-dark);color:var(--white);border-color:var(--sage-dark)}
+.port-panel{display:none}
+.port-panel.on{display:block}
+.port-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:2rem;justify-items:center}
+
+/* PHONE MOCKUP */
+.pw{width:160px;position:relative;transition:transform .4s cubic-bezier(.34,1.56,.64,1);cursor:default}
+.pw:hover{transform:translateY(-7px) scale(1.02)}
+.ps{width:160px;height:320px;background:#141210;border-radius:36px;border:2px solid #252320;position:relative;overflow:hidden;box-shadow:0 18px 48px rgba(0,0,0,.65),inset 0 0 0 1px rgba(255,255,255,.04)}
+.pn{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:60px;height:19px;background:#0a0908;border-radius:12px;z-index:5}
+.pscr{position:absolute;inset:3px;border-radius:33px;overflow:hidden;background:#0a0908}
+.pbr{position:absolute;right:-3px;top:75px;width:3px;height:46px;background:#1e1c1a;border-radius:2px 0 0 2px}
+.pbl1{position:absolute;left:-3px;top:65px;width:3px;height:28px;background:#1e1c1a;border-radius:0 2px 2px 0}
+.pbl2{position:absolute;left:-3px;top:103px;width:3px;height:44px;background:#1e1c1a;border-radius:0 2px 2px 0}
+
+/* VIDEO IFRAME inside phone */
+.vid-frame{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  width:120%;height:120%;
+  border:none;
+  object-fit:cover;
+  border-radius:33px;
+}
+
+/* COMING SOON phone screen */
+.cs-screen{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:.6rem;
+  background:linear-gradient(160deg,var(--cream2),var(--beige));
+}
+.cs-icon{font-size:1.4rem;opacity:.35}
+.cs-text{font-size:.52rem;letter-spacing:.25em;text-transform:uppercase;color:var(--warm);text-align:center;line-height:1.8}
+
+/* CONTACT */
+#contact{padding:6rem 2rem;display:flex;flex-direction:column;align-items:center;text-align:center}
+#contact .eyebrow{margin-bottom:.8rem}
+#contact .sec-title{margin-bottom:1rem}
+.contact-sub{font-size:.9rem;line-height:1.8;color:var(--warm);max-width:440px;margin:0 auto 2.5rem}
+.contact-box{background:var(--white);border:1px solid var(--beige);border-radius:28px;padding:2.5rem;width:100%;max-width:480px;box-shadow:0 8px 40px rgba(143,168,136,.1)}
+.cf{margin-bottom:1.3rem;text-align:left}
+.cf label{display:block;font-size:.58rem;letter-spacing:.3em;text-transform:uppercase;color:var(--warm);margin-bottom:.5rem}
+.cf input,.cf select,.cf textarea{width:100%;padding:.7rem 1rem;border:1px solid var(--beige);border-radius:12px;background:var(--cream);font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:300;color:var(--charcoal);outline:none;transition:border-color .3s;-webkit-appearance:none;appearance:none}
+.cf input:focus,.cf select:focus,.cf textarea:focus{border-color:var(--sage)}
+.cf textarea{height:95px;resize:none;line-height:1.6}
+.send-btn{width:100%;padding:.88rem;background:var(--sage-dark);color:var(--white);border:none;border-radius:50px;font-family:'DM Sans',sans-serif;font-size:.68rem;letter-spacing:.25em;text-transform:uppercase;cursor:pointer;transition:background .3s,transform .2s}
+.send-btn:hover{background:var(--black);transform:translateY(-2px)}
+.contact-note{font-size:.68rem;color:var(--warm);margin-top:.9rem}
+.success-msg{display:none;text-align:center;padding:2rem}
+.success-msg p{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--sage-dark);font-style:italic;line-height:1.8}
+
+/* FOOTER */
+footer{background:var(--charcoal);padding:2rem 3rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.foot-logo{font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--cream);text-decoration:none;letter-spacing:.12em}
+.foot-copy{font-size:.58rem;letter-spacing:.15em;color:rgba(255,255,255,.3)}
+.foot-links{display:flex;gap:1.5rem}
+.foot-links a{font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4);text-decoration:none;transition:color .3s}
+.foot-links a:hover{color:var(--sage-light)}
+
+/* INSTAGRAM BUTTON */
+.ig-btn{
+  display:inline-flex;align-items:center;gap:.55rem;
+  margin-top:2rem;
+  font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+  padding:.7rem 1.8rem;
+  border:1px solid var(--sage-light);
+  border-radius:50px;
+  color:var(--sage-dark);
+  text-decoration:none;
+  transition:background .3s,color .3s,border-color .3s,transform .2s;
+}
+.ig-btn:hover{background:var(--sage-dark);color:var(--white);border-color:var(--sage-dark);transform:translateY(-2px)}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .85s ease,transform .85s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* RESPONSIVE */
+@media(max-width:860px){
+  nav{padding:1.2rem 1.5rem}
+  nav.stuck{padding:.8rem 1.5rem}
+  .nav-links,.nav-cta{display:none}
+  .ham{display:flex}
+  #hero{padding:6.5rem 1.5rem 3rem}
+  .photos-strip .photo-frame:nth-child(3){display:block}
+  .photos-strip .photo-frame:nth-child(1){width:95px;height:128px}
+  .photos-strip .photo-frame:nth-child(2){width:118px;height:155px}
+  .photos-strip .photo-frame:nth-child(3){width:93px;height:124px}
+  .stats-bar{padding:1.8rem 1rem;justify-content:flex-start}
+  .stat-block{padding:0 1.2rem}
+  .logos-block{padding:1.2rem 1rem 0;width:100%;justify-content:center;gap:1.5rem}
+  #about{padding:4rem 1.5rem}
+  #portfolio{padding:4rem 1.5rem;background:var(--cream2)}
+  .port-grid{grid-template-columns:repeat(2,1fr);gap:1.2rem}
+  .pw{width:140px}
+  .ps{width:140px;height:280px;border-radius:30px}
+  #contact{padding:4rem 1.5rem}
+  .contact-box{padding:2rem 1.5rem}
+  footer{flex-direction:column;text-align:center;padding:1.8rem 1.5rem}
+  .foot-links{justify-content:center}
+}
+@media(max-width:480px){
+  .port-grid{grid-template-columns:repeat(2,1fr);gap:.9rem}
+  .pw{width:130px}
+  .ps{width:130px;height:260px;border-radius:28px}
+}
+</style>
+</head>
+<body>
+
+<div id="loader"><div class="ld-name">Samsarah</div><div class="ld-bar"></div></div>
+
+<div class="mob-menu" id="mobMenu">
+  <button class="mob-close" id="mobClose">✕ chiudi</button>
+  <a href="#about" onclick="closeMob()">About</a>
+  <a href="#portfolio" onclick="closeMob()">Portfolio</a>
+  <a href="#contact" onclick="closeMob()">Contatti</a>
+</div>
+
+<nav id="nav">
+  <a href="#" class="nav-logo">Samsarah</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#portfolio">Portfolio</a></li>
+    <li><a href="#contact">Contatti</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Collabora con me</a>
+  <button class="ham" id="ham"><span></span><span></span><span></span></button>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <p class="hero-eyebrow">Beauty · Wellness · Fashion · Lifestyle · Travel</p>
+  <h1 class="hero-title">Contenuti <em>autentici</em>.</h1>
+  <p class="hero-role">UGC Creator &amp; Visual Storyteller</p>
+  <p class="hero-sub">Contenuti UGC moderni, estetici e naturali per brand lifestyle, beauty e fashion. Video pensati per connettere, raccontare e trasformare i prodotti in esperienze visive autentiche.</p>
+  <div class="hero-btns">
+    <a href="#portfolio" class="btn-fill">Guarda il portfolio</a>
+    <a href="#contact" class="btn-outline">Lavoriamo insieme</a>
+  </div>
+  <div class="photos-strip">
+    <div class="photo-frame">
+      <img src="https://drive.google.com/thumbnail?id=1YfKk8J30vBU9Rmer6U9iJHkyIeRUcGHF&sz=w600" alt="spritz aesthetic" loading="lazy">
+    </div>
+    <div class="photo-frame">
+      <img src="https://drive.google.com/thumbnail?id=1DygurneJHVyh5HdoNKSxfzVQg4bCQEMW&sz=w600" alt="riflesso" loading="lazy">
+    </div>
+    <div class="photo-frame">
+      <img src="https://drive.google.com/thumbnail?id=1riBzCKlA704E2Qci7i3gltbPcTncJ3YL&sz=w600" alt="pranzo vista lago" loading="lazy">
+    </div>
+  </div>
+</section>
+
+<!-- ─── STATS + LOGHI ─── -->
+<div class="stats-bar reveal">
+  <div class="stat-block">
+    <div class="stat-n">10+</div>
+    <div class="stat-l">Collaborazioni</div>
+  </div>
+  <div class="logos-block">
+    <div class="brand-pill"><img src="https://drive.google.com/thumbnail?id=13C8FJNt1lzRhem3OvPN__rwWQ_kQ1EtS&sz=w300" alt="Logo 1" loading="lazy"></div>
+    <div class="brand-pill"><img src="https://drive.google.com/thumbnail?id=1s26i3MaTYmvfQtobxPXWUnn0MrseVorL&sz=w300" alt="Logo 2" loading="lazy"></div>
+    <div class="brand-pill"><img src="https://drive.google.com/thumbnail?id=1oWe4HmsxMPEpndJguedUgYrBrHDXITGz&sz=w300" alt="Logo 3" loading="lazy"></div>
+    <div class="brand-pill"><img src="https://drive.google.com/thumbnail?id=1tkxzY-yOQ-LeCThgLdt5-Ynjd9iWO6lg&sz=w300" alt="Logo 4" loading="lazy"></div>
+    <div class="brand-pill"><img src="https://drive.google.com/thumbnail?id=1I-2sb-CeYF2RFCiU_ak684pSVm15UXkR&sz=w300" alt="Logo 5" loading="lazy"></div>
+  </div>
+</div>
+
+<!-- ─── ABOUT ─── -->
+<section id="about">
+  <p class="eyebrow reveal">Chi sono</p>
+  <h2 class="sec-title reveal">Creating content<br><em>that connects.</em></h2>
+  <p class="reveal">Sono una UGC Creator italiana, creo video pensati per social media e advertising che uniscono storytelling visivo e naturalezza — con l'obiettivo di aiutare i brand a comunicare in maniera più umana e coinvolgente.</p>
+  
+  <div class="about-tags reveal">
+    <span class="tag-pill">Beauty</span>
+    <span class="tag-pill">Wellness</span>
+    <span class="tag-pill">Fashion</span>
+    <span class="tag-pill">Lifestyle</span>
+    <span class="tag-pill">Food &amp; Wine</span>
+    <span class="tag-pill">Travel</span>
+    <span class="tag-pill">No-face UGC</span>
+    <span class="tag-pill">Reel · TikTok · Ads</span>
+  </div>
+  <a href="https://www.instagram.com/sarahanima/" target="_blank" class="ig-btn reveal">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ig-grad" x1="0%" y1="100%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#f09433"/>
+          <stop offset="25%" style="stop-color:#e6683c"/>
+          <stop offset="50%" style="stop-color:#dc2743"/>
+          <stop offset="75%" style="stop-color:#cc2366"/>
+          <stop offset="100%" style="stop-color:#bc1888"/>
+        </linearGradient>
+      </defs>
+      <rect x="2" y="2" width="20" height="20" rx="5" stroke="url(#ig-grad)" stroke-width="1.8"/>
+      <circle cx="12" cy="12" r="4" stroke="url(#ig-grad)" stroke-width="1.8"/>
+      <circle cx="17.5" cy="6.5" r=".8" fill="url(#ig-grad)"/>
+    </svg>
+    @sarahanima
+  </a>
+</section>
+
+<!-- ─── PORTFOLIO ─── -->
+<section id="portfolio">
+  <div class="port-head">
+    <p class="eyebrow reveal">Portfolio</p>
+    <h2 class="sec-title reveal">I miei <em>lavori</em>.</h2>
+  </div>
+  <div class="port-tabs reveal">
+    <button class="tab-btn on" data-t="beauty">Beauty &amp; Wellness</button>
+    <button class="tab-btn" data-t="fashion">Fashion &amp; Lifestyle</button>
+    <button class="tab-btn" data-t="food">Food &amp; Travel</button>
+  </div>
+
+            <!-- BEAUTY & WELLNESS -->
+  <div class="port-panel on" id="t-beauty">
+    <div class="port-grid">
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><video class="vid-frame" autoplay muted loop playsinline preload="metadata" src="Beauty%26Wellness_1.MP4"></video></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><video class="vid-frame" autoplay muted loop playsinline preload="metadata" src="Beauty%26Wellness_2.MP4"></video></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><video class="vid-frame" autoplay muted loop playsinline preload="metadata" src="Beauty%26Wellness_3.MP4"></video></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><video class="vid-frame" autoplay muted loop playsinline preload="metadata" src="Beauty%26Wellness_4.MP4"></video></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+    </div>
+  </div>
+
+  <!-- FASHION & LIFESTYLE -->
+  <div class="port-panel" id="t-fashion">
+    <div class="port-grid">
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><video class="vid-frame" autoplay muted loop playsinline preload="metadata" src="Fashion%26Lifestyle_1.MP4"></video></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><div class="cs-screen"><div class="cs-icon">✦</div><div class="cs-text">Coming<br>soon</div></div></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><div class="cs-screen"><div class="cs-icon">✦</div><div class="cs-text">Coming<br>soon</div></div></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+    </div>
+  </div>
+
+  <!-- FOOD & TRAVEL -->
+  <div class="port-panel" id="t-food">
+    <div class="port-grid">
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><video class="vid-frame" autoplay muted loop playsinline preload="metadata" src="Food%26Travel_1.MP4"></video></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><video class="vid-frame" autoplay muted loop playsinline preload="metadata" src="Food%26Travel_2.MP4"></video></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><video class="vid-frame" autoplay muted loop playsinline preload="metadata" src="Food%26Travel_3.MP4"></video></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+      <div class="pw"><div class="ps"><div class="pn"></div><div class="pscr"><video class="vid-frame" autoplay muted loop playsinline preload="metadata" src="Food%26Travel_4.MP4"></video></div><div class="pbr"></div><div class="pbl1"></div><div class="pbl2"></div></div></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ─── CONTACT ─── -->
+<section id="contact">
+  <p class="eyebrow reveal">Lavoriamo insieme</p>
+  <h2 class="sec-title reveal">Hai un brand che merita<br><em>contenuti veri</em>?</h2>
+  <p class="contact-sub reveal">Scrivimi — rispondo entro 24 ore.</p>
+  <div class="contact-box reveal" id="cbox">
+    <div class="cf"><label>Nome brand / Azienda</label><input type="text" placeholder="Es. La Mia Marca" id="fb"></div>
+    <div class="cf"><label>La tua email</label><input type="email" placeholder="hello@tuabrand.com" id="fe"></div>
+    <div class="cf"><label>Tipo di collaborazione</label>
+      <select id="ft"><option value="">Seleziona…</option><option>Invio prodotto (gifted)</option><option>UGC a pagamento</option><option>Pacchetto video ads</option><option>Partnership continuativa</option><option>Altro</option></select>
+    </div>
+    <div class="cf"><label>Messaggio</label><textarea placeholder="Raccontami del tuo brand…" id="fm"></textarea></div>
+    <button class="send-btn" onclick="sendForm()">Invia →</button>
+    <p class="contact-note">Nessuno spam · rispondo entro 24h</p>
+  </div>
+  <div class="success-msg" id="smsg"><p>Grazie per avermi scritto ✦<br>Ti rispondo presto.</p></div>
+</section>
+
+<footer>
+  <a href="#" class="foot-logo">Samsarah</a>
+  <div class="foot-links">
+    <a href="#about">About</a>
+    <a href="#portfolio">Portfolio</a>
+    <a href="https://www.instagram.com/sarahanima/" target="_blank">Instagram</a>
+  </div>
+  <p class="foot-copy">© 2025 Samsarah · UGC Creator · Italy</p>
+</footer>
+
+<script>
+window.addEventListener('load',()=>setTimeout(()=>document.getElementById('loader').classList.add('out'),900));
+window.addEventListener('scroll',()=>document.getElementById('nav').classList.toggle('stuck',scrollY>50));
+document.getElementById('ham').addEventListener('click',()=>document.getElementById('mobMenu').classList.add('open'));
+document.getElementById('mobClose').addEventListener('click',()=>document.getElementById('mobMenu').classList.remove('open'));
+function closeMob(){document.getElementById('mobMenu').classList.remove('open')}
+const ro=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');ro.unobserve(e.target)}}),{threshold:.1,rootMargin:'0px 0px -25px 0px'});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+    document.querySelectorAll('.port-panel').forEach(p=>p.classList.remove('on'));
+    btn.classList.add('on');
+    document.getElementById('t-'+btn.dataset.t)?.classList.add('on');
+  });
+});
+async function sendForm(){
+  const b=document.getElementById('fb').value.trim();
+  const e=document.getElementById('fe').value.trim();
+  const t=document.getElementById('ft').value;
+  const m=document.getElementById('fm').value;
+  if(!b||!e||!t){alert('Compila almeno brand, email e tipo di collaborazione.');return}
+  const btn=document.querySelector('.send-btn');
+  btn.textContent='Invio in corso…';
+  btn.disabled=true;
+  function fallbackMailto(){
+    const sub=encodeURIComponent('Collaborazione UGC – '+b);
+    const body=encodeURIComponent('Brand: '+b+'\nEmail: '+e+'\nTipo: '+t+'\n\n'+m);
+    window.location.href='mailto:tuaemail@email.com?subject='+sub+'&body='+body;
+    document.getElementById('cbox').style.display='none';
+    document.getElementById('smsg').style.display='block';
+  }
+  try{
+    const res=await fetch('https://formspree.io/f/xgoqnqzr',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({brand:b,email:e,tipo:t,messaggio:m})
+    });
+    if(res.ok){
+      document.getElementById('cbox').style.display='none';
+      document.getElementById('smsg').style.display='block';
+    } else if(res.status===429){
+      // limite raggiunto - fallback mailto
+      fallbackMailto();
+    } else {
+      btn.textContent='Invia →';
+      btn.disabled=false;
+      alert('Qualcosa è andato storto. Riprova.');
+    }
+  }catch(err){
+    // errore rete - fallback mailto
+    fallbackMailto();
+  }
+}
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'})}}));
+</script>
+</body>
+</html>
