@@ -425,6 +425,36 @@ async function sendForm(){
   }
 }
 document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const t=document.querySelector(a.getAttribute('href'));if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth',block:'start'})}}));
+
+// Force video autoplay
+function tryPlay(video){
+  video.muted=true;
+  video.volume=0;
+  const p=video.play();
+  if(p!==undefined) p.catch(()=>{});
+}
+const vobs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const v=e.target;
+      v.muted=true;
+      v.volume=0;
+      tryPlay(v);
+    } else {
+      e.target.pause();
+    }
+  });
+},{threshold:0.1});
+document.querySelectorAll('video').forEach(v=>{
+  v.muted=true;
+  v.volume=0;
+  v.setAttribute('muted','');
+  v.setAttribute('playsinline','');
+  vobs.observe(v);
+});
+document.addEventListener('click',()=>{
+  document.querySelectorAll('video').forEach(v=>tryPlay(v));
+},{once:true});
 </script>
 </body>
 </html>
